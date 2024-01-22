@@ -7,8 +7,8 @@ use serde_json::Value;
 
 // set global variables
 // Change these paths to the location of the dataset and labels on your machine
-const DATASET_PATH: &str = "F:/Dissertation Dataset/bdd100k_images_100k/bdd100k/images/100k";
-const LABELS_PATH: &str = "F:/Dissertation Dataset/bdd100k_det_20_labels_trainval/bdd100k/labels/det_20";
+const DATASET_PATH: &str = "F:/Dissertation/Berkeley DeepDrive Dataset/bdd100k_images_100k/bdd100k/images/100k";
+const LABELS_PATH: &str = "F:/Dissertation/Berkeley DeepDrive Dataset/bdd100k_det_20_labels_trainval/bdd100k/labels/det_20";
 
 // object classes to be detected
 const OBJECT_CLASSES: [&str; 10] = [
@@ -172,8 +172,9 @@ fn create_folder_structure(new_dir: String) {
 fn create_data_yaml(new_dir: String) {
     // create data yaml file
     let mut data_yaml_file = fs::File::create(new_dir.clone() + "data.yaml").unwrap();
-    data_yaml_file.write(b"train: ../train/images\n").unwrap();
-    data_yaml_file.write(b"val: ../val/images\n").unwrap();
+    data_yaml_file.write(b"train: ./bdd100k_formatted_dataset/train/images\n").unwrap();
+    data_yaml_file.write(b"val: ./bdd100k_formatted_dataset/val/images\n").unwrap();
+    data_yaml_file.write(b"test: ./bdd100k_formatted_dataset/test/images\n").unwrap();
     data_yaml_file.write(b"\n").unwrap();
     data_yaml_file.write(b"nc: 10\n").unwrap();
     data_yaml_file.write(b"names: ['pedestrian', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'traffic light', 'traffic sign']").unwrap();
@@ -291,7 +292,7 @@ fn create_label_txt_file(image_name: String, set: String, new_dir: String, json_
     let image_name = image_name.replace(".jpg", "");
 
     // create label txt file
-    let mut label_txt_file = fs::File::create(new_dir.clone() + &set + "/labels/)" + &image_name + ".txt").unwrap();
+    let mut label_txt_file = fs::File::create(new_dir.clone() + &set + "/labels/" + &image_name + ".txt").unwrap();
 
     // loop through objects in image
     for object in objects_in_image {
