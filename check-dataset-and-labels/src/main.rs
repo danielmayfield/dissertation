@@ -24,6 +24,11 @@ const OBJECT_CLASSES: [&str; 10] = [
     "traffic sign"
 ];
 
+// dataset reduction factor - needed to reduce the training time from ~150 hours to ~15 hours
+const DATASET_REDUCTION_FACTOR: f64 = 0.1;
+// dataset night time percentage - needed so there is a balance of day and night images in the dataset
+const DATASET_NIGHT_TIME_PERCENTAGE: f64 = 0.2;
+
 // image size - width and height
 const IMAGE_SIZE: (f64, f64) = (1280.0, 720.0);
 
@@ -308,6 +313,19 @@ fn copy_image_and_create_label(image_name: String, set: String, new_dir: String,
     create_label_txt_file(image_name.clone(), set.clone(), new_dir.clone(), json_object.clone());
 }
 
+fn is_night_time_image(json_object: &Value) -> bool {
+    // get time of day
+    let time_of_day = json_object["attributes"]["timeofday"].as_str().unwrap().to_lowercase();
+
+    println!("Time of day: {}", time_of_day);
+
+    // check if time of day is night
+    if time_of_day == "night" {
+        return true;
+    }
+
+    return false;
+}
 
 fn create_train_val_test_sets(matched_names: Vec<String>) {
     // create train, val and test sets
@@ -318,6 +336,25 @@ fn create_train_val_test_sets(matched_names: Vec<String>) {
     println!("Number of train images: {}", train_set.len());
     println!("Number of val images: {}", val_set.len());
     println!("Number of test images: {}", test_set.len());
+
+    // get reduced dataset size
+    let mut reduced_train_set_size = (train_set.len() as f64 * DATASET_REDUCTION_FACTOR) as usize;
+    let mut reduced_val_set_size = (val_set.len() as f64 * DATASET_REDUCTION_FACTOR) as usize;
+    let mut reduced_test_set_size = (test_set.len() as f64 * DATASET_REDUCTION_FACTOR) as usize;
+
+    // print reduced dataset sizes
+    println!("Reduced train set size: {}", reduced_train_set_size);
+    println!("Reduced val set size: {}", reduced_val_set_size);
+    println!("Reduced test set size: {}", reduced_test_set_size);
+
+    let mut night_time_train_set_size = (reduced_train_set_size as f64 * DATASET_NIGHT_TIME_PERCENTAGE) as usize;
+    let mut night_time_val_set_size = (reduced_val_set_size as f64 * DATASET_NIGHT_TIME_PERCENTAGE) as usize;
+    let mut night_time_test_set_size = (reduced_test_set_size as f64 * DATASET_NIGHT_TIME_PERCENTAGE) as usize;
+
+    // reduce dataset size by night time size
+    reduced_train_set_size -= night_time_train_set_size;
+    reduced_val_set_size -= night_time_val_set_size;
+    reduced_test_set_size -= night_time_test_set_size;
 
     // create train, val and test folders
     let new_dir: String = "./bdd100k_formatted_dataset/".to_string();
@@ -344,26 +381,66 @@ fn create_train_val_test_sets(matched_names: Vec<String>) {
 
                     // if image name is in train set
                     if train_set.contains(&image_name) {
-                        // copy and create label file
-                        copy_image_and_create_label(image_name.clone(), "train".to_string(), new_dir.clone(), object.clone());
+                        // if reduced train set size is greater than 0
+                        if reduced_train_set_size > 0 && !is_night_time_image(object){
+                            // copy and create label file
+                            copy_image_and_create_label(image_name.clone(), "train".to_string(), new_dir.clone(), object.clone());
+                            println!("Reduced train set size: {}", reduced_train_set_size);
+                            reduced_train_set_size -= 1;
+                        } else if night_time_train_set_size > 0 && is_night_time_image(object) {
+                            // copy and create label file
+                            copy_image_and_create_label(image_name.clone(), "train".to_string(), new_dir.clone(), object.clone());
+                            println!("Night time train set size: {}", night_time_train_set_size);
+                            night_time_train_set_size -= 1;
+                        }
                     }
 
                     // if image name is in val set
                     if val_set.contains(&image_name) {
-                        // copt and create label file
-                        copy_image_and_create_label(image_name.clone(), "val".to_string(), new_dir.clone(), object.clone());
+                        // if reduced val set size is greater than 0
+                        if reduced_val_set_size > 0 && !is_night_time_image(object){
+                            // copy and create label file
+                            copy_image_and_create_label(image_name.clone(), "val".to_string(), new_dir.clone(), object.clone());
+                            println!("Reduced val set size: {}", reduced_val_set_size);
+                            reduced_val_set_size -= 1;
+                        } else if night_time_val_set_size > 0 && is_night_time_image(object) {
+                            // copy and create label file
+                            copy_image_and_create_label(image_name.clone(), "val".to_string(), new_dir.clone(), object.clone());
+                            println!("Night time val set size: {}", night_time_val_set_size);
+                            night_time_val_set_size -= 1;
+                        }
                     }
 
                     // if image name is in test set
                     if test_set.contains(&image_name) {
-                        // copy and create label file
-                        copy_image_and_create_label(image_name.clone(), "test".to_string(), new_dir.clone(), object.clone());
+                        // if reduced test set size is greater than 0
+                        if reduced_test_set_size > 0 && !is_night_time_image(object){
+                            // copy and create label file
+                            copy_image_and_create_label(image_name.clone(), "test".to_string(), new_dir.clone(), object.clone());
+                            println!("Reduced test set size: {}", reduced_test_set_size);
+                            reduced_test_set_size -= 1;
+                        } else if night_time_test_set_size > 0 && is_night_time_image(object) {
+                            // copy and create label file
+                            copy_image_and_create_label(image_name.clone(), "test".to_string(), new_dir.clone(), object.clone());
+                            println!("Night time test set size: {}", night_time_test_set_size);
+                            night_time_test_set_size -= 1;
+                        }
                     }
                 }
             }
         },
         Err(e) => println!("Error reading directory: {}", e),
     }
+
+    // print remaining dataset sizes
+    println!("Remaining train set size: {}", reduced_train_set_size);
+    println!("Remaining val set size: {}", reduced_val_set_size);
+    println!("Remaining test set size: {}", reduced_test_set_size);
+
+    // print remaining night time dataset sizes
+    println!("Remaining night time train set size: {}", night_time_train_set_size);
+    println!("Remaining night time val set size: {}", night_time_val_set_size);
+    println!("Remaining night time test set size: {}", night_time_test_set_size);
 
     println!("Finished");
 }
