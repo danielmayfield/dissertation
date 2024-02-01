@@ -2,9 +2,9 @@ import os
 import shutil
 import random
 
-SOURCE_720_PATH = "F:/Dissertation/Tests/Performance Test Sets/720"
-SOURCE_1080_PATH = "F:/Dissertation/Recorded_driving/Frames"
-DESTINATION_PATH = "F:/Dissertation/Tests/Performance Test Sets/Mixed"
+SOURCE_720_PATH = "G:/Dissertation/Tests/Performance Test Sets/720"
+SOURCE_1080_PATH = "G:/Dissertation/Tests/Performance Test Sets/1080"
+DESTINATION_PATH = "G:/Dissertation/Tests/Performance Test Sets/Mixed"
 TEST_SET_SIZE = 8000
 
 def main():
@@ -16,7 +16,7 @@ def main():
 
     print("Creating folder file dictionaries...")
     file_list_720 = create_720_file_list()
-    folder_file_dict_1080 = create_1080_folder_file_dict()
+    file_list_1080 = create_1080_file_list()
 
     print("Generating test set...")
     resolution_count = {"720": 0, "1080": 0}
@@ -31,15 +31,12 @@ def main():
         else:
             resolution_count["1080"] += 1
 
-        # randomly select a folder
-        if random_resolution == 1080:
-            random_folder = random.choice(list(folder_file_dict_1080.keys()))
         # randomly select a file from the folder
         while True:
             if random_resolution == 720:
                 random_file = random.choice(file_list_720)
             else:
-                random_file = random.choice(folder_file_dict_1080[random_folder])
+                random_file = random.choice(file_list_1080)
 
             if random_file not in file_tracker:
                 file_tracker.append(random_file)
@@ -52,25 +49,18 @@ def main():
         if random_resolution == 720:
             shutil.copy(SOURCE_720_PATH + "/" + random_file, DESTINATION_PATH + "/" + random_file)
         else:
-            shutil.copy(SOURCE_1080_PATH + "/" + random_folder + "/" + random_file, DESTINATION_PATH + "/" + random_file)
+            shutil.copy(SOURCE_1080_PATH + "/" + random_file, DESTINATION_PATH + "/" + random_file)
 
     print("Performance test set generated for mixed resolution.")
     print("720 Samples: " + str(resolution_count["720"]))
     print("1080 Samples: " + str(resolution_count["1080"]))
 
-def create_1080_folder_file_dict():
-    folder_file_dict = {}
+def create_1080_file_list():
+    # get files in source path
+    files = os.listdir(SOURCE_1080_PATH)
+    print("Folder 1080 has " + str(len(files)) + " files.")
 
-    # get folders in source path
-    folders = os.listdir(SOURCE_1080_PATH)
-
-    # for each folder, get all files
-    for folder in folders:
-        files = os.listdir(SOURCE_1080_PATH + "/" + folder)
-        folder_file_dict[folder] = files
-        print("Folder " + folder + " has " + str(len(files)) + " files.")
-
-    return folder_file_dict
+    return files
 
 def create_720_file_list():
     # get files in source path
