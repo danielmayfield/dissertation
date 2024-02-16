@@ -25,7 +25,7 @@ const OBJECT_CLASSES: [&str; 10] = [
 ];
 
 // dataset reduction factor - needed to reduce the training time from ~150 hours to ~15 hours
-const DATASET_REDUCTION_FACTOR: f64 = 0.1;
+const DATASET_REDUCTION_FACTOR: f64 = 0.1; 
 // dataset night time percentage - needed so there is a balance of day and night images in the dataset
 const DATASET_NIGHT_TIME_PERCENTAGE: f64 = 0.2;
 
