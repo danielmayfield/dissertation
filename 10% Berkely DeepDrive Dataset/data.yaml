@@ -1,0 +1,6 @@
+train: ./bdd100k_formatted_dataset/train/images
+val: ./bdd100k_formatted_dataset/val/images
+test: ./bdd100k_formatted_dataset/test/images
+
+nc: 10
+names: ['pedestrian', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'traffic light', 'traffic sign']
