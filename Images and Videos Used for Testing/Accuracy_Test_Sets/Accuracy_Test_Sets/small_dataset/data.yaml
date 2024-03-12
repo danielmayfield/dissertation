@@ -1,0 +1,4 @@
+val: ./Accuracy_Test_Sets/small_dataset/test/images
+
+nc: 10
+names: ['pedestrian', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'traffic light', 'traffic sign']
